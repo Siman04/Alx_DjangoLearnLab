@@ -1,7 +1,11 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic.detail import DetailView
 
-from .models import Book, Library
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login as auth_login
+from django.contrib.auth.decorators import login_required, user_passes_test
+
+from .models import Book, Library, UserProfile
 from .models import Library
 
 
@@ -25,3 +29,47 @@ class LibraryDetailView(DetailView):
 	model = Library
 	template_name = "relationship_app/library_detail.html"
 	context_object_name = "library"
+
+
+def register_view(request):
+	"""Allow a user to register using Django's built-in UserCreationForm."""
+	if request.method == "POST":
+		form = UserCreationForm(request.POST)
+		if form.is_valid():
+			user = form.save()
+			# login the user immediately after registration
+			auth_login(request, user)
+			return redirect("relationship_app:list_books")
+	else:
+		form = UserCreationForm()
+	return render(request, "relationship_app/register.html", {"form": form})
+
+
+def _is_admin(user):
+	return hasattr(user, "userprofile") and user.userprofile.role == UserProfile.ROLE_ADMIN
+
+
+def _is_librarian(user):
+	return hasattr(user, "userprofile") and user.userprofile.role == UserProfile.ROLE_LIBRARIAN
+
+
+def _is_member(user):
+	return hasattr(user, "userprofile") and user.userprofile.role == UserProfile.ROLE_MEMBER
+
+
+@login_required
+@user_passes_test(_is_admin)
+def admin_view(request):
+	return render(request, "relationship_app/admin_view.html")
+
+
+@login_required
+@user_passes_test(_is_librarian)
+def librarian_view(request):
+	return render(request, "relationship_app/librarian_view.html")
+
+
+@login_required
+@user_passes_test(_is_member)
+def member_view(request):
+	return render(request, "relationship_app/member_view.html")
