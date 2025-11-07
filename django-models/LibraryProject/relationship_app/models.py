@@ -15,6 +15,13 @@ class Book(models.Model):
 	def __str__(self) -> str:  # pragma: no cover - simple repr
 		return f"{self.title} ({self.author})"
 
+	class Meta:
+		permissions = (
+			('can_add_book', 'Can add book'),
+			('can_change_book', 'Can change book'),
+			('can_delete_book', 'Can delete book'),
+		)
+
 
 class Library(models.Model):
 	name = models.CharField(max_length=255)

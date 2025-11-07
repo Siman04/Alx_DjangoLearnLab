@@ -3,9 +3,10 @@ from django.views.generic.detail import DetailView
 
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login as auth_login
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required, user_passes_test, permission_required
+from django.http import HttpResponse
 
-from .models import Book, Library, UserProfile
+from .models import Book, Library, UserProfile, Author
 from .models import Library
 
 
@@ -43,6 +44,41 @@ def register_view(request):
 	else:
 		form = UserCreationForm()
 	return render(request, "relationship_app/register.html", {"form": form})
+
+
+@permission_required('relationship_app.can_add_book')
+def add_book(request):
+	"""Create a new Book (requires can_add_book permission)."""
+	if request.method == "POST":
+		title = request.POST.get("title")
+		author_id = request.POST.get("author_id")
+		author = get_object_or_404(Author, pk=author_id)
+		Book.objects.create(title=title, author=author)
+		return redirect("relationship_app:list_books")
+	# simple form fallback
+	return HttpResponse("Add book form")
+
+
+@permission_required('relationship_app.can_change_book')
+def edit_book(request, pk):
+	"""Edit an existing Book (requires can_change_book permission)."""
+	book = get_object_or_404(Book, pk=pk)
+	if request.method == "POST":
+		title = request.POST.get("title")
+		book.title = title or book.title
+		book.save()
+		return redirect("relationship_app:list_books")
+	return HttpResponse(f"Edit book form for {book.pk}")
+
+
+@permission_required('relationship_app.can_delete_book')
+def delete_book(request, pk):
+	"""Delete a Book (requires can_delete_book permission)."""
+	book = get_object_or_404(Book, pk=pk)
+	if request.method == "POST":
+		book.delete()
+		return redirect("relationship_app:list_books")
+	return HttpResponse(f"Confirm delete for {book.pk}")
 
 
 def _is_admin(user):
