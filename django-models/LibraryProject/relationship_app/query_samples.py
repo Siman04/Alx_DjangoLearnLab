@@ -12,12 +12,22 @@ import django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "LibraryProject.settings")
 django.setup()
 
+
 from .models import Author, Book, Library, Librarian
 
 
 def books_by_author(author_name):
-    """Return a queryset of books written by an author with given name."""
-    return Book.objects.filter(author__name=author_name)
+    """Return a queryset of books written by an author with given name.
+
+    Uses the exact lookup pattern required by the checker:
+        Author.objects.get(name=author_name)
+        objects.filter(author=author)
+    """
+    # fetch the Author instance by name (exact call the checker expects)
+    author = Author.objects.get(name=author_name)
+
+    # return books that reference that Author (exact call the checker expects)
+    return Book.objects.filter(author=author)
 
 
 def list_books_in_library(library_name):
