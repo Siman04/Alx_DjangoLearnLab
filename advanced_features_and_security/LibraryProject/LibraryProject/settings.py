@@ -1,3 +1,5 @@
+# Secure proxy SSL header for HTTPS
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 """
 Django settings for LibraryProject project.
 
