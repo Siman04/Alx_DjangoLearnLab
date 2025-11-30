@@ -13,6 +13,8 @@ class BookAPITestCase(APITestCase):
         url = reverse('book-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Ensure response includes serialized data
+        self.assertIsNotNone(response.data)
 
     def test_create_book(self):
         url = reverse('book-list')
