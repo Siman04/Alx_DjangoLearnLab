@@ -5,6 +5,14 @@ from django.contrib.auth.models import User
 class Tag(models.Model):
     """Tag model for categorizing posts."""
     name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=100, unique=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        # Auto-populate slug from name when not provided
+        from django.utils.text import slugify
+        if not self.slug and self.name:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name

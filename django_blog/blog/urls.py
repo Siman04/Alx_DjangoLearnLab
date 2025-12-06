@@ -30,4 +30,5 @@ urlpatterns = [
 
     # Tag URLs
     path('tags/<str:tag_name>/', views.TagPostListView.as_view(), name='tag_posts'),
+    path('tags/<slug:tag_slug>/', views.PostByTagListView.as_view(), name='posts_by_tag'),
 ]
