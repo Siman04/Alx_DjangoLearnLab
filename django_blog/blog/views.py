@@ -44,8 +44,8 @@ class PostListView(ListView):
 
         if query:
             queryset = queryset.filter(
-                Q(title__icontains=query) | Q(content__icontains=query)
-            )
+                Q(title__icontains=query) | Q(content__icontains=query) | Q(tags__name__icontains=query)
+            ).distinct()
         if tag:
             queryset = queryset.filter(tags__name=tag)
 
