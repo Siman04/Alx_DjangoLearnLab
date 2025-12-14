@@ -64,3 +64,13 @@ def like_post(request, pk):
     if created:
         Notification.objects.create(recipient=post.author, actor=request.user, verb='liked your post', target=post)
     return Response({'status': 'liked'})
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def unlike_post(request, pk):
+    """Endpoint to unlike a post (remove existing like)."""
+    post = generics.get_object_or_404(Post, pk=pk)
+    # remove any existing like by this user for the post
+    Like.objects.filter(user=request.user, post=post).delete()
+    return Response({'status': 'unliked'})
