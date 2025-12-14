@@ -4,6 +4,10 @@ from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from .serializers import UserSerializer, RegisterSerializer
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response as DRFResponse
 
 User = get_user_model()
 
@@ -53,3 +57,24 @@ class ProfileAPIView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def follow_user(request, user_id):
+    """Follow another user (adds to `following`)."""
+    target = get_object_or_404(get_user_model(), pk=user_id)
+    if target == request.user:
+        return DRFResponse({'detail': "Cannot follow yourself."}, status=400)
+    request.user.following.add(target)
+    return DRFResponse({'detail': 'followed'})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def unfollow_user(request, user_id):
+    """Unfollow another user (removes from `following`)."""
+    target = get_object_or_404(get_user_model(), pk=user_id)
+    request.user.following.remove(target)
+    return DRFResponse({'detail': 'unfollowed'})
