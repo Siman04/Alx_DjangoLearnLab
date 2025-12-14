@@ -10,6 +10,11 @@ DEBUG = False
 
 ALLOWED_HOSTS = []
 
+# Security settings (set for production)
+SECURE_BROWSER_XSS_FILTER = True
+X_FRAME_OPTIONS = 'DENY'
+SECURE_SSL_REDIRECT = True
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
